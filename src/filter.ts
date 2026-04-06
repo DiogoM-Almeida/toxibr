@@ -269,21 +269,55 @@ export function createFilter(options: ToxiBROptions = {}) {
     }
 
     // Layer 2: Context-sensitive words
+    // Check proximity: directed pattern must be within ~8 words of the sensitive word
+    const normalizedWords = normalized.split(/\s+/);
+
     for (const { word, regex } of contextSensitiveRegexes) {
       if (!regex.test(normalized)) continue;
 
-      const hasSelfExpression = SELF_EXPRESSION_PATTERNS.some(p => p.test(normalized));
-      const hasDirected = DIRECTED_PATTERNS.some(p => p.test(normalized));
-
-      // If directed at someone → block (even if self-expression also present)
-      if (hasDirected) {
-        return { allowed: false, reason: 'directed_insult', matched: word };
+      // Find position(s) of the context-sensitive word in the message
+      const normalizedWord = normalize(word);
+      const wordPositions: number[] = [];
+      for (let i = 0; i < normalizedWords.length; i++) {
+        if (normalizedWords[i] === normalizedWord) wordPositions.push(i);
       }
 
-      // Pure self-expression → allow
-      if (hasSelfExpression) continue;
+      if (wordPositions.length === 0) {
+        // Multi-word match — fall back to checking nearby text
+        const matchIdx = normalized.indexOf(normalizedWord);
+        if (matchIdx >= 0) {
+          const before = normalized.substring(0, matchIdx).split(/\s+/).length - 1;
+          wordPositions.push(before);
+        }
+      }
 
-      // Ambiguous → allow
+      // Check each occurrence independently — use proximity to decide
+      for (const pos of wordPositions) {
+        // Check progressively closer windows: whoever is closest wins
+        let closestDirected = Infinity;
+        let closestSelfExpr = Infinity;
+
+        // Find closest directed pattern
+        for (let radius = 1; radius <= 8; radius++) {
+          const ws = Math.max(0, pos - radius);
+          const we = Math.min(normalizedWords.length, pos + radius + 1);
+          const w = normalizedWords.slice(ws, we).join(' ');
+          if (closestDirected === Infinity && DIRECTED_PATTERNS.some(p => p.test(w))) {
+            closestDirected = radius;
+          }
+          if (closestSelfExpr === Infinity && SELF_EXPRESSION_PATTERNS.some(p => p.test(w))) {
+            closestSelfExpr = radius;
+          }
+          if (closestDirected < Infinity && closestSelfExpr < Infinity) break;
+        }
+
+        // Directed is closer (or equal) than self-expression → block
+        if (closestDirected < Infinity && closestDirected <= closestSelfExpr) {
+          return { allowed: false, reason: 'directed_insult', matched: word };
+        }
+      }
+
+      // All occurrences are self-expression or ambiguous → allow
     }
 
     return { allowed: true };
