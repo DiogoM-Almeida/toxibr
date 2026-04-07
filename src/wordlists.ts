@@ -207,6 +207,13 @@ export const HARD_BLOCKED: string[] = [
   'ta duro', 'ta dura', 'ficou duro', 'ficou dura',
   'deixar o oco', 'deixar um oco', 'ficar um oco',
   'da mais prazer', 'mais prazer', 'muito prazer',
+  'pau na cara', 'pau na minha cara', 'pau na tua cara',
+  'esfrega', 'esfregando', 'esfregar',
+  'cheia de porra', 'cheio de porra', 'cara de porra',
+  'saco cheio de porra', 'saco cheio',
+  'sentir o leite', 'quer sentir o leite',
+  'negao gostoso', 'negao',
+  'botar para fora', 'botar pra fora',
   'gozar', 'gozada', 'gozadas', 'gozei', 'gozou', 'gozaram',
   'jorrar', 'jorrada', 'jorrou', 'jorro', 'jorradas',
   'foder', 'fudendo', 'fudido',
@@ -409,6 +416,28 @@ export const CONTEXT_SENSITIVE_EMOJIS: string[] = [
   '🐵',     // macaco
   '🐒',     // macaco
   '🦍',     // gorila
+];
+
+/** Palavras-semente sexuais — inocentes sozinhas, suspeitas quando 3+ aparecem juntas.
+ *  Todas devem estar em lowercase, sem acentos. */
+export const SEXUAL_SEED_WORDS: string[] = [
+  // Corpo / anatomia
+  'pau', 'pica', 'rola', 'cu', 'rabo', 'bola', 'bolas', 'saco',
+  'peito', 'peitos', 'bunda', 'teta', 'mamilo', 'mamilos',
+  // Fluidos / acao
+  'leite', 'porra', 'gozar', 'gozei', 'gozou', 'jato',
+  'molhada', 'molhado', 'duro', 'dura', 'durinho',
+  // Verbos sexuais
+  'chupar', 'lamber', 'mamar', 'meter', 'enfiar', 'socar',
+  'sentar', 'rebolar', 'quicar', 'cavalgar',
+  'gemer', 'gritar', 'arregacar',
+  // Contexto
+  'gostoso', 'gostosa', 'delicia', 'tesao',
+  'pelado', 'pelada', 'nu', 'nua',
+  'camisinha', 'calcinha', 'cueca',
+  'explodir', 'lotado', 'cheio', 'cheia',
+  'veiudo', 'grosso', 'enorme', 'grande',
+  'cuspir', 'engolir',
 ];
 
 /** Padrões que indicam fala dirigida a outra pessoa (2ª pessoa). */

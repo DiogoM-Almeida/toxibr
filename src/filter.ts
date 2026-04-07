@@ -7,6 +7,7 @@ import {
   CONTEXT_SENSITIVE,
   DIRECTED_PATTERNS,
   SELF_EXPRESSION_PATTERNS,
+  SEXUAL_SEED_WORDS,
   OFFENSIVE_EMOJIS,
   OFFENSIVE_EMOJI_SEQUENCES,
   CONTEXT_SENSITIVE_EMOJIS,
@@ -344,6 +345,38 @@ export function createFilter(options: ToxiBROptions = {}) {
       }
 
       // All occurrences are self-expression or ambiguous → allow
+    }
+
+    // Layer 3: Sexual seed word density — if 3+ sexual seed words appear
+    // in a sliding window of 10 words, the content is suspicious
+    {
+      const seedSet = new Set(SEXUAL_SEED_WORDS);
+      const words = normalized.split(/\s+/);
+      const windowSize = 10;
+
+      for (let i = 0; i <= words.length - windowSize; i++) {
+        const window = words.slice(i, i + windowSize);
+        const seedMatches = window.filter(w => seedSet.has(w));
+        if (seedMatches.length >= 3) {
+          return {
+            allowed: false,
+            reason: 'suspicious_content',
+            matched: seedMatches.join(', '),
+          };
+        }
+      }
+
+      // Also check shorter messages (< windowSize words)
+      if (words.length < windowSize && words.length >= 3) {
+        const seedMatches = words.filter(w => seedSet.has(w));
+        if (seedMatches.length >= 3) {
+          return {
+            allowed: false,
+            reason: 'suspicious_content',
+            matched: seedMatches.join(', '),
+          };
+        }
+      }
     }
 
     return { allowed: true };
