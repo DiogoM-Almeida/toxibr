@@ -304,6 +304,25 @@ export const HARD_BLOCKED: string[] = [
   'preto imundo', 'preta imunda',
   'bola gato',
 
+  // ── Nazismo / fascismo / supremacia ──
+  'nazi', 'nazista', 'nazismo', 'neonazi', 'neonazista', 'neonazismo',
+  'nazistas', 'neonazistas',
+  'hitler', 'adolf hitler', 'hitller', 'httler',
+  'suastica', 'suasticas',
+  'holocausto',
+  'campo de concentracao', 'campos de concentracao',
+  'heil hitler', 'sieg heil',
+  'white power', 'supremacia branca', 'poder branco',
+  'arianismo', 'raca ariana', 'ariano', 'arianos',
+  'terceiro reich', 'reich',
+  'gestapo', 'ss nazista',
+  'skinhead', 'skinheads',
+  'fascista', 'fascismo', 'fascistas',
+  'ku klux klan', 'kkk',
+  // Abreviacoes nazistas
+  'nz', 'hh',
+  'nazsimo', 'nazismu',
+
   // ── Misoginia / red pill ──
   'feminazi',
   'hipergamia',
