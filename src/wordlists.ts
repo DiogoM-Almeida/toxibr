@@ -244,6 +244,8 @@ export const HARD_BLOCKED: string[] = [
   'tenho pena de voce', 'tenho pena de tu', 'tenho do de voce',
   'voce e uma vergonha', 'tu e uma vergonha',
   'que vergonha voce', 'que vergonha tu',
+  'virar homem de verdade', 'ser homem de verdade',
+  'vira homem', 'seja homem',
   'dar o rabo', 'dando o rabo',
   'pegando aids',
   'sente vergonha de tu', 'sente vergonha de voce',
