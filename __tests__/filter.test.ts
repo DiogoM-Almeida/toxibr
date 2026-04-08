@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, jest } from '@jest/globals';
 import {
   filterContent,
   normalize,
@@ -139,12 +139,28 @@ describe('bypass prevention', () => {
     expect(filterContent('3stupr0').allowed).toBe(false);
   });
 
-  it('blocks with accents: viàdo', () => {
-    expect(filterContent('viàdo').allowed).toBe(false);
+  it('blocks with unusual accents: viàdo, vîado, pũta, etc.', () => {
+    const words = [
+      'viàdo', 'pùta', 'èstupro',
+      'vîado', 'pûta', 'bûceta',
+      'viãdo', 'pũta',
+      'raça ariana',
+      'vïado', 'vīado', 'pūta',
+    ];
+    words.forEach(word => {
+      expect(filterContent(word).allowed).toBe(false);
+    });
   });
 
   it('blocks with zero-width chars', () => {
     expect(filterContent('vi\u200Bado').allowed).toBe(false);
+    expect(filterContent('v\u200Diado').allowed).toBe(false);
+    expect(filterContent('vi\u200Dado').allowed).toBe(false);
+    expect(filterContent('p\u200Du\u200Dt\u200Da').allowed).toBe(false);
+  });
+
+  it('blocks with Zalgo Text / heavy combining marks', () => {
+    expect(filterContent('v̵i̵a̵d̵o̵').allowed).toBe(false);
   });
 
   it('blocks repeated chars: viiaaado', () => {
@@ -451,6 +467,71 @@ describe('false positives — new v2 additions must not break', () => {
   safe.forEach((phrase) => {
     it(`allows: "${phrase}"`, () => {
       expect(filterContent(phrase).allowed).toBe(true);
+    });
+  });
+});
+
+// ─── False positives — Brazilian proper names ────────────────────────────────
+
+describe('false positives — Brazilian proper names must NEVER block', () => {
+  const names = [
+    // ── Femininos (fonte: API IBGE, todas as décadas + complementos) ──────────
+    'Adriana', 'Alessandra', 'Alice', 'Aline', 'Alzira', 'Amanda', 'Ana',
+    'Andrea', 'Andreia', 'Antonia', 'Aparecida', 'Beatriz', 'Benedita',
+    'Bianca', 'Bruna', 'Camila', 'Carla', 'Carolina', 'Claudia', 'Cristiane',
+    'Cristina', 'Daiane', 'Daniela', 'Debora', 'Denise', 'Eduarda', 'Elaine',
+    'Eliane', 'Elisa', 'Elza', 'Evelyn', 'Fabiana', 'Fatima', 'Fernanda',
+    'Flavia', 'Francisca', 'Gabriela', 'Geovana', 'Helena', 'Heloisa',
+    'Isabel', 'Isabela', 'Jaqueline', 'Jessica', 'Joana', 'Josefa', 'Julia',
+    'Juliana', 'Janaína', 'Karine', 'Katia', 'Larissa', 'Laura', 'Leticia',
+    'Lidia', 'Lilian', 'Lorena', 'Luana', 'Lucia', 'Luciana', 'Luiza',
+    'Luzia', 'Marcia', 'Maria', 'Mariana', 'Marina', 'Marlene', 'Marli',
+    'Monica', 'Nadia', 'Nair', 'Natalia', 'Nilza', 'Patricia', 'Poliana',
+    'Priscila', 'Rafaela', 'Raimunda', 'Raquel', 'Regina', 'Renata', 'Rita',
+    'Roberta', 'Rosa', 'Rosana', 'Rosangela', 'Roseli', 'Sandra', 'Sara',
+    'Sebastiana', 'Selma', 'Silvana', 'Silvia', 'Simone', 'Solange', 'Sonia',
+    'Sueli', 'Tamara', 'Tamires', 'Tania', 'Tatiane', 'Tatiana', 'Tereza',
+    'Terezinha', 'Vanessa', 'Vera', 'Viviane', 'Vitoria', 'Yasmin',
+    // Nomes com risco de colisão identificados
+    'Ariane', 'Assunção', 'Conceição', 'Mara',
+    // ── Masculinos (fonte: API IBGE, todas as décadas + complementos) ─────────
+    'Adriano', 'Alexandre', 'Anderson', 'Andre', 'Antonio', 'Artur',
+    'Augusto', 'Benedito', 'Bruno', 'Caio', 'Carlos', 'Claudio', 'Cristiano',
+    'Daniel', 'Diego', 'Edilson', 'Edson', 'Eduardo', 'Emerson', 'Everton',
+    'Ezequiel', 'Fabio', 'Felipe', 'Fernando', 'Flavio', 'Francisco',
+    'Gabriel', 'Geraldo', 'Gilberto', 'Gilmar', 'Gilson', 'Giovanni',
+    'Guilherme', 'Gustavo', 'Heitor', 'Henrique', 'Hugo', 'Humberto',
+    'Igor', 'Ivan', 'Jefferson', 'Joao', 'Joaquim', 'Joel', 'Jonas',
+    'Jorge', 'Jose', 'Junior', 'Leandro', 'Leonardo', 'Levi', 'Lucas',
+    'Luciano', 'Luis', 'Luiz', 'Manoel', 'Manuel', 'Marcelo', 'Marcio',
+    'Marcos', 'Mario', 'Mateus', 'Matheus', 'Mauricio', 'Mauro', 'Miguel',
+    'Milton', 'Moises', 'Murilo', 'Natan', 'Nelson', 'Nilson', 'Otavio',
+    'Osvaldo', 'Pablo', 'Paulo', 'Pedro', 'Rafael', 'Raimundo', 'Renan',
+    'Renato', 'Ricardo', 'Roberto', 'Robson', 'Rodrigo', 'Ronaldo', 'Ruan',
+    'Rubens', 'Samuel', 'Sandro', 'Sebastiao', 'Sergio', 'Severino',
+    'Thiago', 'Tiago', 'Valdir', 'Vanderlei', 'Victor', 'Vicente', 'Vinicius',
+    'Vitor', 'Waldir', 'Wanderlei', 'Wellington', 'William', 'Wilson',
+    // ── Sobrenomes top-78 (Censo 2022 IBGE) ──────────────────────────────────
+    'Silva', 'Santos', 'Oliveira', 'Souza', 'Pereira', 'Ferreira', 'Lima',
+    'Alves', 'Rodrigues', 'Costa', 'Sousa', 'Gomes', 'Nascimento', 'Araujo',
+    'Ribeiro', 'Almeida', 'Jesus', 'Barbosa', 'Soares', 'Carvalho', 'Martins',
+    'Lopes', 'Vieira', 'Rocha', 'Dias', 'Gonçalves', 'Fernandes', 'Santana',
+    'Andrade', 'Batista', 'Campos', 'Mendes', 'Cardoso', 'Teixeira', 'Freitas',
+    'Correia', 'Pinto', 'Cavalcanti', 'Braga', 'Medeiros', 'Azevedo', 'Castro',
+    'Cunha', 'Cruz', 'Brito', 'Nunes', 'Miranda', 'Morais', 'Neto', 'Monteiro',
+    'Moreira', 'Moura', 'Machado', 'Ramos', 'Coelho', 'Borges', 'Melo',
+    'Faria', 'Rezende', 'Guimarães', 'Figueiredo', 'Macedo', 'Duarte',
+    'Silveira', 'Porto', 'Amorim', 'Leite', 'Paiva', 'Queiroz',
+    'Vasconcelos', 'Xavier', 'Maia', 'Lacerda', 'Bastos', 'Pires', 'Tavares',
+  ];
+
+  names.forEach((name) => {
+    it(`allows name: "${name}"`, () => {
+      expect(filterContent(name).allowed).toBe(true);
+    });
+
+    it(`allows in phrase: "mensagem de ${name}"`, () => {
+      expect(filterContent(`mensagem de ${name}`).allowed).toBe(true);
     });
   });
 });
